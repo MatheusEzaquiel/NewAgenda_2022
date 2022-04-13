@@ -1,3 +1,11 @@
+<?php
+  ob_start(); //Armazena meus dados em cache
+  session_start(); //Inicia a sessão
+  if(!isset($_SESSION['loginUser'])&&(!isset($_SESSION['senhaUser']))){
+    header("Location: index.php?acao=negado");
+  }
+  include_once('sair.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,10 +70,13 @@
           
           <a href="#" class="dropdown-item">
             <i class="fas fa-user-edit"></i></i> Editar Perfil
-            
+             <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Relatório de Usuários</h3>
+          </div>
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+          <a href="?sair" class="dropdown-item">
             <i class="fas fa-sign-out-alt"></i> Sair do sistema
           </a>
           
@@ -88,10 +99,10 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="dist/img/photo1.png" class="img-circle elevation-2" alt="User Image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Matheus B.</a>
+          <a href="#" class="d-block">Leandro Costa</a>
         </div>
       </div>
 
@@ -152,47 +163,64 @@
         
       </div><!-- /.container-fluid -->
     </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        
+        <!-- /.row -->
+        <!-- Main row -->
         <div class="row">
           <div class="col-md-5">
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Editar contato</h3>
+                <h3 class="card-title">Editar Contato</h3>
               </div>
+              <!-- /.card-header -->
+              <!-- form start -->
               <?php
                 include_once('config/conexao.php');
                 $id=$_GET['idUp'];
                 $select = "SELECT * FROM tb_contato WHERE id_contato=:id";
                 try{
-                  $resultSel = $conect->prepare($select);
-                  $resultSel ->bindParam(':id',$id, PDO::PARAM_INT);
-                  $resultSel -> execute();
-                  $contar=$resultSel->rowCount();
-                  if($contar>0){
-                    while($show=$resultSel->FETCH(PDO::FETCH_OBJ)){
-                      $idCont = $show->id_contato; 
-                      $nomeCont = $show->nome_contato;
-                      $foneCont = $show->telefone_contato;  
-                      $emailCont = $show->email_contato;
-                      $fotoCont = $show->foto_contato;
+                    $resultSel = $conect->prepare($select);
+                    $resultSel->bindParam(':id',$id,PDO::PARAM_INT);
+                    $resultSel->execute();
+
+                    $contar=$resultSel->rowCount();
+                    if($contar>0){
+                        while($show = $resultSel->FETCH(PDO::FETCH_OBJ)){
+                            $idCont = $show->id_contato;
+                            $nomeCont = $show->nome_contato;
+                            $foneCont = $show->telefone_contato;
+                            $emailCont = $show->email_contato;
+                            $fotoCont = $show->foto_contato;
+                        }  
+                    }else{
+                        echo '<div class="alert alert-danger">
+                    Contato não Cadastrado!</div>';
                     }
-                  }
-                }catch(PDOException $id){}
+                }catch(PDOException $e){
+                  echo "<strong>ERRO DE SELECT NO PDO: </strong>".$e->getMessage();
+                }
+                
+
               ?>
-              <form action="" method="post" enctype="multipart/form-data"> <!-- serve para enviar um arquivo multimidia-->
+              <form action="" method="post" enctype="multipart/form-data">
                 <div class="card-body">
                   <div class="form-group">
                     <label for="exampleInputPassword1">Nome</label>
-                    <input name="nome" type="text" class="form-control" id="exampleInputPassword1" value="<?php echo $nomeCont ?>">
+                    <input name="nome" type="text" class="form-control" id="exampleInputPassword1" value="<?php echo $nomeCont; ?>">
                   </div>
                   <div class="form-group">
                     <label for="exampleInputPassword1">Telefone</label>
-                    <input name="telefone" type="text" class="form-control" id="exampleInputPassword1" value="<?php echo $foneCont ?>">
+                    <input name="telefone" type="text" class="form-control" id="exampleInputPassword1" value="<?php echo $foneCont; ?>">
                   </div>
                   <div class="form-group">
                     <label for="exampleInputEmail1">Endereço de E-mail</label>
-                    <input name="email" type="email" class="form-control" id="exampleInputEmail1" value="<?php echo $emailCont ?>">
+                    <input name="email" type="email" class="form-control" id="exampleInputEmail1" value="<?php echo $emailCont; ?>">
                   </div>
                   
                   <div class="form-group">
@@ -207,37 +235,42 @@
                   </div>
                   
                 </div>
+                <!-- /.card-body -->
+
                 <div class="card-footer">
-                  <button name="btnCContato" type="submit" class="btn btn-primary">Editar Contato</button>
+                  <button name="btnUpContato" type="submit" class="btn btn-primary">Editar Contato</button>
                 </div>
               </form>
               <?php
-                  if(isset($_POST['btnCContato'])){
+                  
+                  if(isset($_POST['btnUpContato'])){
                       $nome = $_POST['nome'];
                       $telefone = $_POST['telefone'];
                       $email = $_POST['email'];
-                      
+
                       if(!empty($_FILES['foto']['name'])){
-                        $formatP = array("png","jpg","jpeg","JPG","gif");
-                        $extensao = pathinfo($_FILES['foto']['name'],PATHINFO_EXTENSION);
-                        if(in_array($extensao, $formatP)){
+                      $formatP = array("png","jpg","jpeg","JPG","gif");
+                      $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+
+                      if(in_array($extensao, $formatP)){
                           $pasta = "img/contato/";
                           $temporario = $_FILES['foto']['tmp_name'];
                           $novoNome = uniqid().".$extensao";
                           if(move_uploaded_file($temporario, $pasta.$novoNome)){
-
-                            
+                              
                           }else{
-                            echo "Erro não foi possível fazer o upload do arquivo!";
+                            echo "Erro, não foi possível fazer o upload do arquivo!";
                           }
-                        }else{
-                          echo "Formato Inválido";
-                        }
+
                       }else{
-                        $novoNome = $fotoCont;
+                        echo "Formato de imagem Inválida";
                       }
-                      $editar = "UPDATE tb_contato SET nome_contato=:nome,telefone_contato=:telefone,email_contato=:email,foto_contato=:foto WHERE id_contato=:id";
-                      $cadastro = "INSERT INTO tb_contato (nome_contato, telefone_contato, email_contato, foto_contato) VALUES (:nome, :telefone, :email, :foto)";
+                    }else{
+                      $novoNome=$fotoCont;
+                    }
+                      $editar = "UPDATE tb_contato SET nome_contato=:nome,telefone_contato=
+                      :telefone,email_contato=:email,foto_contato=:foto WHERE 
+                      id_contato=:id";
                       try{
                         $result = $conect->prepare($editar);
                         $result->bindParam(':id',$id,PDO::PARAM_STR);
@@ -246,6 +279,7 @@
                         $result->bindParam(':email',$email,PDO::PARAM_STR);
                         $result->bindParam(':foto',$novoNome,PDO::PARAM_STR);
                         $result->execute();
+
                         $contar = $result->rowCount();
                         if($contar > 0){
                           echo '<div class="container">
@@ -265,26 +299,41 @@
                                 </div>';
                         }
                       }catch(PDOException $e){
-                        echo "<strong>ERRO DE CADASTRO PDO </strong>".$e->getMessage();
+                        echo "<strong>ERRO DE CADASTRO PDO = </strong>".$e->getMessage();
                       }
+
+
+
+
+
+
+
+
+                      
+
+                      
                   }
-              ?> 
+              ?>
             </div>
           </div>
           <div class="col-md-7">
             <div class="card card-primary">
               <div class="card-body p-0" style="text-align:center;">
-             <img style="margin-top:100px;width:150px;border-radius:100%" src="img/contato/<?php echo $fotoCont ?>"> 
-             <h1><?php echo $nomeCont ?></h1>
-             <h2><?php echo $foneCont ?></h2>
-             <h3 style="margin-bottom:100px;"><?php echo $emailCont ?></h3>
+                <img style="width:150px; border-radius:100%;margin-top:100px" src="img/contato/<?php echo $fotoCont; ?>">
+                <h1><?php echo $nomeCont; ?></h1>
+                <h2><?php echo $foneCont; ?></h2>
+                <h4 style="margin-bottom:110px"><?php echo $emailCont; ?></h4>
               </div>
+              <!-- /.card-body -->
             </div>
           </div>
         </div>
-      </div>
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
     </section>
+    <!-- /.content -->
   </div>
+  <!-- /.content-wrapper -->
   <footer class="main-footer">
     <strong>Copyright &copy; 2021 - Todos os direitos reservados a</strong>
     Agenda JMF.
@@ -292,7 +341,10 @@
       <b>Version</b> 1.0
     </div>
   </footer>
+
+  <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
   </aside>
   <!-- /.control-sidebar -->
 </div>
@@ -333,4 +385,4 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="dist/js/pages/dashboard.js"></script>
 </body>
-</html> 
+</html>

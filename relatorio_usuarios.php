@@ -11,7 +11,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agenda JMF | Relatório</title>
+  <title>Agenda JMF | Relatório de Usuários</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -144,7 +144,7 @@
                     Perfil
                   </p>
                 </a>
-              </li>  
+              </li>     
                <li class="nav-item">
                 <a href="relatorio_usuarios.php" class="nav-link">
                   <i class="nav-icon fas fa-address-card"></i>
@@ -152,8 +152,8 @@
                     Relatório de Usuários
                   </p>
                 </a>
-              </li>    
-                 
+              </li>  
+                
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -243,24 +243,24 @@
           <div class="col-md-12">
           <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Relatório de Contatos</h3>
-              </div>
+                <h3 class="card-title">Relatório de Usuários</h3>
+          </div>
               <!-- /.card-header -->
               <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
                   <thead>
                   <tr>
-                    <th>Foto do contato</th>
+                    <th>Foto do usuário</th>
                     <th>Nome</th>
-                    <th>Telefone</th>
                     <th>E-mail</th>
                     <th>Ações</th>
+                 
                   </tr>
                   </thead>
                   <tbody>
                   <?php
                     include_once('config/conexao.php');
-                      $select = "SELECT * FROM tb_contato ORDER BY id_contato DESC";
+                      $select = "SELECT * FROM tb_user ORDER BY id_user DESC";
                       try{
                         $resultado = $conect->prepare($select);
                         $resultado->execute();
@@ -270,14 +270,13 @@
                     ?>
                   <tr>
                     <td style="text-align: center">
-                      <img style="width:55px; border-radius:100%" src="img/contato/<?php echo $show->foto_contato;?>">
+                      <img style="width:55px; border-radius:100%" src="img/user/<?php echo $show->foto_user;?>">
                     </td>
-                    <td style="vertical-align:middle;"><?php echo $show->nome_contato;?></td>
-                    <td style="vertical-align:middle;"><?php echo $show->telefone_contato;?></td>
-                    <td style="vertical-align:middle;"><?php echo $show->email_contato;?></td>
+                    <td style="vertical-align:middle;"><?php echo $show->nome_user;?></td>
+                    <td style="vertical-align:middle;"><?php echo $show->email_user;?></td>
                     <td style="vertical-align:middle; text-align:center">
-                      <a href="editar.php?idUp=<?php echo $show->id_contato;?>" class="btn btn-success" title="Editar"><img style="width: 16px" src="img/svg/editar.png"></a>
-                      <a href="del.php?idDel=<?php echo $show->id_contato;?>" class="btn btn-danger" title="Remover" onclick="return confirm('Deseja remover o contato <?php echo $show->nome_contato;?>?')"><img style="width: 14px" src="img/svg/remover.png"></a>
+                      <a href="editar_usuarios.php?idUp=<?php echo $show->id_user;?>" class="btn btn-success" title="Editar"><img style="width: 16px" src="img/svg/editar.png"></a>
+                      <a href="del_usuarios.php?idDel=<?php echo $show->id_user;?>" class="btn btn-danger" title="Remover" onclick="return confirm('Deseja remover o contato <?php echo $show->nome_user;?>?')"><img style="width: 14px" src="img/svg/remover.png"></a>
                     </td>
                   </tr>
                   <?php
@@ -302,7 +301,7 @@
                     <th>Nome</th>
                     <th>Telefone</th>
                     <th>E-mail</th>
-                    <th>Ações</th>
+                  
                   </tr>
                   </tfoot>
                 </table>

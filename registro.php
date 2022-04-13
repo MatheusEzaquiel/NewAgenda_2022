@@ -26,7 +26,7 @@
 
       <form action="" method="post" enctype="multipart/form-data">
         <div class="input-group mb-3">
-          <input name="nome" type="text" class="form-control" placeholder="Nome do usuário...">
+          <input name="nome" type="text" class="form-control" placeholder="Nome...">
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-user"></span>
@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="input-group mb-3">
-          <input name="email" type="email" class="form-control" placeholder="E-mail do usuário">
+          <input name="email" type="email" class="form-control" placeholder="E-mail...">
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-envelope"></span>
@@ -42,7 +42,7 @@
           </div>
         </div>
         <div class="input-group mb-3">
-          <input name="senha" type="password" class="form-control" placeholder="Senha do usuário">
+          <input name="senha" type="password" class="form-control" placeholder="Senha">
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-lock"></span>
@@ -62,71 +62,64 @@
           
           <!-- /.col -->
           <div class="col-6">
-            <button name=btnCContato style="margin: 0 0 20px 0;" type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+            <button name="btnRegistro" style="margin: 0 0 20px 0;" type="submit" class="btn btn-primary btn-block">Registrar</button>
           </div>
           <!-- /.col -->
         </div>
       </form>
       <?php
                   include_once('config/conexao.php');
-                  if(isset($_POST['btnCContato'])){
+                  if(isset($_POST['btnRegistro'])){
                       $nome = $_POST['nome'];
                       $email = $_POST['email'];
-                      $senha= base64_encode($_POST['senha']);
-                      $formatP = array("png","jpg","jpeg","JPG","gif");    //Vai mostrar o formato do arquivo,só poderar os que vem escritos aqui
-                      $extensao = pathinfo($_FILES['foto']['name'],PATHINFO_EXTENSION);   //.Extrai a extensão do nome do arquivo-->                                                      
-                      
+                      $senha = base64_encode($_POST['senha']);
+                      $formatP = array("png","jpg","jpeg","JPG","gif");
+                      $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
 
                       if(in_array($extensao, $formatP)){
-                        $pasta = "img/user/";
-                        $temporario = $_FILES['foto']['tmp_name'];
-                        $novoNome = uniqid().".$extensao";     //uniqid altera o nome da imagem
-                        if(move_uploaded_file($temporario, $pasta.$novoNome)){
+                          $pasta = "img/user/";
+                          $temporario = $_FILES['foto']['tmp_name'];
+                          $novoNome = uniqid().".$extensao";
+                          if(move_uploaded_file($temporario, $pasta.$novoNome)){
+                              $cadastro = "INSERT INTO tb_user (nome_user, email_user, senha_user, foto_user) VALUES (:nome,:email,:senha,:foto)";
+                      try{
+                        $result = $conect->prepare($cadastro);
+                        $result->bindParam(':nome',$nome,PDO::PARAM_STR);
+                        $result->bindParam(':email',$email,PDO::PARAM_STR);
+                        $result->bindParam(':senha',$senha,PDO::PARAM_STR);
+                        $result->bindParam(':foto',$novoNome,PDO::PARAM_STR);
+                        $result->execute();
 
-                          $cadastro = "INSERT INTO Usuarios (nome_usuario, email_usuario, senha_usuario, foto_usuario) VALUES (:nome, :email, :senha, :foto)";
-                          try{
-                          $result = $conect->prepare($cadastro);
-                          $result->bindParam(':nome',$nome,PDO::PARAM_STR);
-                          $result->bindParam(':email',$email,PDO::PARAM_STR);
-                          $result->bindParam(':senha',$senha,PDO::PARAM_STR);
-                          $result->bindParam(':foto',$novoNome,PDO::PARAM_STR);
-                          $result->execute();
-    
-                            $contar = $result->rowCount();
-                            if($contar > 0){
-                              echo '<div class="container">
-                                        <div class="alert alert-success alert-dismissible">
-                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                                        <h5><i class="icon fas fa-check"></i> OK!</h5>
-                                        Usuario inserido com sucesso !!!
-                                      </div>
-                                    </div>';
-                                    header("Refresh: 3, index.php");
-                                    
-                            }else{
-                              echo '<div class="container">
-                                        <div class="alert alert-danger alert-dismissible">
-                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                                        <h5><i class="icon fas fa-check"></i> Ops!</h5>
-                                        Contato não cadastrados !!!
-                                      </div>
-                                    </div>';
-                                
-
-                            }
-                          }catch(PDOException $e){
-                            echo "<strong>ERRO DE CADASTRO PDO = </strong>".$e->getMessage();
-                          }
+                        $contar = $result->rowCount();
+                        if($contar > 0){
+                          echo '<div class="container">
+                                    <div class="alert alert-success alert-dismissible">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                    <h5><i class="icon fas fa-check"></i> OK!</h5>
+                                    Usuário inserido com sucesso !!!
+                                  </div>
+                                </div>';
+                                header("Refresh: 3, index.php");
                         }else{
-                          echo "Erro não foi possível fazer o upload do arquivo!";
+                          echo '<div class="container">
+                                    <div class="alert alert-danger alert-dismissible">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                    <h5><i class="icon fas fa-check"></i> Ops!</h5>
+                                    Usuário não cadastrados !!!
+                                  </div>
+                                </div>';
                         }
+                      }catch(PDOException $e){
+                        echo "<strong>ERRO DE CADASTRO PDO = </strong>".$e->getMessage();
+                      }
+                          }else{
+                            echo "Erro, não foi possível fazer o upload do arquivo!";
+                          }
+
                       }else{
                         echo "Formato Inválido";
-                      }
-                       // o in array vai conferir se realmente esta com o formato certo
-                     
-                  } 
-                  
+                      }   
+                  }
               ?>
       <a href="index.php" class="text-center">Ir para o login!</a>
     </div>

@@ -1,3 +1,11 @@
+<?php
+  ob_start(); //Armazena meus dados em cache
+  session_start(); //Inicia a sessão
+  if(!isset($_SESSION['loginUser'])&&(!isset($_SESSION['senhaUser']))){
+    header("Location: index.php?acao=negado");
+  }
+  include_once('sair.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,7 +73,7 @@
             
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+          <a href="?sair" class="dropdown-item">
             <i class="fas fa-sign-out-alt"></i> Sair do sistema
           </a>
           
@@ -88,10 +96,10 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="dist/img/photo1.png" class="img-circle elevation-2" alt="User Image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Matheus B.</a>
+          <a href="#" class="d-block">Leandro Costa</a>
         </div>
       </div>
 
@@ -133,10 +141,19 @@
                 <a href="perfil.php" class="nav-link">
                   <i class="nav-icon fas fa-address-card"></i>
                   <p>
-                    Perfl
+                    Perfil
                   </p>
                 </a>
-              </li>       
+              </li>
+               <li class="nav-item">
+                <a href="relatorio_usuarios.php" class="nav-link">
+                  <i class="nav-icon fas fa-address-card"></i>
+                  <p>
+                    Relatório de Usuários
+                  </p>
+                </a>
+              </li> 
+             
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -167,9 +184,9 @@
               <div class="card-header">
                 <h3 class="card-title">Cadastrar contato</h3>
               </div>
-              <!-- /.card-header --> 
+              <!-- /.card-header -->
               <!-- form start -->
-              <form action="" method="post" enctype="multipart/form-data"> <!-- serve para enviar um arquivo multimidia-->
+              <form action="" method="post" enctype="multipart/form-data">
                 <div class="card-body">
                   <div class="form-group">
                     <label for="exampleInputPassword1">Nome</label>
@@ -196,7 +213,6 @@
                   </div>
                   
                 </div>
-                
                 <!-- /.card-body -->
 
                 <div class="card-footer">
@@ -209,57 +225,66 @@
                       $nome = $_POST['nome'];
                       $telefone = $_POST['telefone'];
                       $email = $_POST['email'];
-                      $formatP = array("png","jpg","jpeg","JPG","gif");    //Vai mostrar o formato do arquivo,só poderar os que vem escritos aqui
-                      $extensao = pathinfo($_FILES['foto']['name'],PATHINFO_EXTENSION);   //.Extrai a extensão do nome do arquivo-->                                                      
-                      
+                      $formatP = array("png","jpg","jpeg","JPG","gif");
+                      $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
 
                       if(in_array($extensao, $formatP)){
-                        $pasta = "img/contato/";
-                        $temporario = $_FILES['foto']['tmp_name'];
-                        $novoNome = uniqid().".$extensao";     //uniqid altera o nome da imagem
-                        if(move_uploaded_file($temporario, $pasta.$novoNome)){
+                          $pasta = "img/contato/";
+                          $temporario = $_FILES['foto']['tmp_name'];
+                          $novoNome = uniqid().".$extensao";
+                          if(move_uploaded_file($temporario, $pasta.$novoNome)){
+                              $cadastro = "INSERT INTO tb_contato (nome_contato, telefone_contato, email_contato, foto_contato) VALUES (:nome, :telefone, :email, :foto)";
+                      try{
+                        $result = $conect->prepare($cadastro);
+                        $result->bindParam(':nome',$nome,PDO::PARAM_STR);
+                        $result->bindParam(':telefone',$telefone,PDO::PARAM_STR);
+                        $result->bindParam(':email',$email,PDO::PARAM_STR);
+                        $result->bindParam(':foto',$novoNome,PDO::PARAM_STR);
+                        $result->execute();
 
-                          $cadastro = "INSERT INTO tb_contato (nome_contato, telefone_contato, email_contato, foto_contato) VALUES (:nome, :telefone, :email, :foto)";
-                          try{
-                          $result = $conect->prepare($cadastro);
-                          $result->bindParam(':nome',$nome,PDO::PARAM_STR);
-                          $result->bindParam(':telefone',$telefone,PDO::PARAM_STR);
-                          $result->bindParam(':email',$email,PDO::PARAM_STR);
-                          $result->bindParam(':foto',$novoNome,PDO::PARAM_STR);
-                          $result->execute();
-    
-                            $contar = $result->rowCount();
-                            if($contar > 0){
-                              echo '<div class="container">
-                                        <div class="alert alert-success alert-dismissible">
-                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                                        <h5><i class="icon fas fa-check"></i> OK!</h5>
-                                        Contato inserido com sucesso !!!
-                                      </div>
-                                    </div>';
-                            }else{
-                              echo '<div class="container">
-                                        <div class="alert alert-danger alert-dismissible">
-                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                                        <h5><i class="icon fas fa-check"></i> Ops!</h5>
-                                        Contato não cadastrados !!!
-                                      </div>
-                                    </div>';
-                            }
-                          }catch(PDOException $e){
-                            echo "<strong>ERRO DE CADASTRO PDO = </strong>".$e->getMessage();
-                          }
+                        $contar = $result->rowCount();
+                        if($contar > 0){
+                          echo '<div class="container">
+                                    <div class="alert alert-success alert-dismissible">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                    <h5><i class="icon fas fa-check"></i> OK!</h5>
+                                    Contato inserido com sucesso !!!
+                                  </div>
+                                </div>';
                         }else{
-                          echo "Erro não foi possível fazer o upload do arquivo!";
+                          echo '<div class="container">
+                                    <div class="alert alert-danger alert-dismissible">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                    <h5><i class="icon fas fa-check"></i> Ops!</h5>
+                                    Contato não cadastrados !!!
+                                  </div>
+                                </div>';
                         }
+                      }catch(PDOException $e){
+                        echo "<strong>ERRO DE CADASTRO PDO = </strong>".$e->getMessage();
+                      }
+                          }else{
+                            echo "Erro, não foi possível fazer o upload do arquivo!";
+                          }
+
                       }else{
                         echo "Formato Inválido";
                       }
-                       // o in array vai conferir se realmente esta com o formato certo
-                     
-                  } 
-                  
-              ?> 
+                      
+
+
+
+
+
+
+
+
+
+                      
+
+                      
+                  }
+              ?>
             </div>
           </div>
           <div class="col-md-7">
@@ -293,7 +318,6 @@
                       <td><?php echo $show->nome_contato;?></td>
                       <td><?php echo $show->telefone_contato;?></td>
                       <td><?php echo $show->email_contato;?></td>
-                      <td><?php echo "";?></td>
                     </tr>
                     <?php
                       }
@@ -303,7 +327,6 @@
                   }catch(PDOException $e){
                     echo '<strong>ERRO DE PDO= </strong>'.$e->getMessage();
                   }
-                
                     ?>
                     
                   </tbody>
@@ -370,4 +393,4 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="dist/js/pages/dashboard.js"></script>
 </body>
-</html> 
+</html>

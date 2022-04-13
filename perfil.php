@@ -1,3 +1,11 @@
+<?php
+  ob_start(); //Armazena meus dados em cache
+  session_start(); //Inicia a sessão
+  if(!isset($_SESSION['loginUser'])&&(!isset($_SESSION['senhaUser']))){
+    header("Location: index.php?acao=negado");
+  }
+  include_once('sair.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,7 +73,7 @@
             
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+          <a href="?sair" class="dropdown-item">
             <i class="fas fa-sign-out-alt"></i> Sair do sistema
           </a>
           
@@ -91,7 +99,7 @@
           <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Matheus B.</a>
+          <a href="#" class="d-block">Leandro Costa</a>
         </div>
       </div>
 
@@ -133,10 +141,18 @@
                 <a href="perfil.php" class="nav-link">
                   <i class="nav-icon fas fa-address-card"></i>
                   <p>
-                    Perfl
+                    Perfil
                   </p>
                 </a>
-              </li>       
+              </li> 
+              <li class="nav-item">
+                <a href="relatorio_usuarios.php" class="nav-link">
+                  <i class="nav-icon fas fa-book"></i>
+                  <p>
+                    Relatório Usuário
+                  </p>
+                </a>
+              </li>   
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -270,8 +286,8 @@
                         if($contar > 0){
                           while($show = $resultado->FETCH(PDO::FETCH_OBJ)){   
                     ?>
-                    <tr><!--ERRO NA IMAGEM-->
-                      <td><img style="width: 41px; border-radius: 100%;" src="img/contato/<?php echo $show->foto_contato;?>"></td>
+                    <tr>
+                      <td><img style="width: 41px; border-radius: 100%;"  src="img/contato/<?php echo $show->foto_contato;?>"></td>
                       <td><?php echo $show->nome_contato;?></td>
                       <td><?php echo $show->telefone_contato;?></td>
                       <td><?php echo $show->email_contato;?></td>

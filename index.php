@@ -1,3 +1,10 @@
+<?php
+  ob_start(); //Armazena meus dados em cache
+  session_start(); //Inicia a sessão
+  if(isset($_SESSION['loginUser'])&&(isset($_SESSION['senhaUser']))){
+    header("Location: home.php");
+  }
+?>
 <!DOCTYPE html>
 <html lang="pt_br">
 <head>
@@ -50,6 +57,58 @@
           <!-- /.col -->
         </div>
       </form>
+      <?php
+        include_once('config/conexao.php');
+        //Tratamento da acao=negado e acao=sair
+        if(isset($_GET['acao'])){
+          $acao = $_GET['acao'];
+          //echo $acao;
+          if($acao=='negado'){
+            echo '<br>
+            <div class="alert alert-danger"  role="alert">
+              Você não tem permissão para acessar a agenda, efetue o login
+              </div>';
+              header("Refresh: 5, index.php");
+          }else if($acao=='sair'){
+            echo '<br>
+            <div class="alert alert-warning"  role="alert">
+              Você saiu da agenda eletrônica, volte sempre :)
+              </div>';
+              header("Refresh: 5, index.php");
+          }
+        }
+        //Criação da sessão de Login
+        if(isset($_POST['btnlogin'])){
+          $login=$_POST['email'];
+          $senha=base64_encode($_POST['senha']);
+          $select="SELECT * FROM tb_user WHERE email_user=:emailLogin AND senha_user=:senhaLogin";
+          try {
+            $resultLogin = $conect->prepare($select);
+            $resultLogin->bindParam(':emailLogin',$login, PDO::PARAM_STR);
+            $resultLogin->bindParam(':senhaLogin',$senha, PDO::PARAM_STR);
+            $resultLogin->execute();
+
+            $verificar = $resultLogin->rowCount();
+            if ($verificar>0) {
+              $login=$_POST['email'];
+              $senha=$_POST['senha'];
+              //CRIAR SESSAO »»
+              $_SESSION['loginUser'] = $login;
+              $_SESSION['senhaUser'] = $senha;
+
+              echo '<br>
+            <div class="alert alert-success"  role="alert">
+              Você será redirecionado para a agenda :)
+              </div>';
+              header("Refresh: 3, home.php");
+            }else{
+              echo "E-mail ou senha incorretos";
+            }
+          } catch(PDOException $e){
+            echo "<strong>ERRO DE LOGIN = </strong>".$e->getMessage();
+          }
+        }
+      ?>
 
       
       <!-- /.social-auth-links -->
