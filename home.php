@@ -269,20 +269,7 @@
 
                       }else{
                         echo "Formato Inválido";
-                      }
-                      
-
-
-
-
-
-
-
-
-
-                      
-
-                      
+                      }     
                   }
               ?>
             </div>
